@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>whydidyarender: compiler comparison</title>
+    <style>
+      :root {
+        color-scheme: dark;
+      }
+      body {
+        margin: 0;
+        background: #0a0a0a;
+        color: #e5e5e5;
+        font-family:
+          system-ui,
+          -apple-system,
+          "Segoe UI",
+          sans-serif;
+      }
+      header {
+        padding: 1.5rem 1.5rem 1rem;
+        text-align: center;
+      }
+      header h1 {
+        margin: 0 0 0.25rem;
+        font-size: 1.25rem;
+        font-weight: 600;
+      }
+      header p {
+        margin: 0;
+        color: #a3a3a3;
+        font-size: 0.875rem;
+      }
+      main {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1px;
+        background: #262626;
+        height: calc(100vh - 5.5rem);
+      }
+      .pane {
+        display: flex;
+        flex-direction: column;
+        background: #0a0a0a;
+        min-width: 0;
+      }
+      .pane-label {
+        padding: 0.5rem 1rem;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #737373;
+        border-bottom: 1px solid #262626;
+      }
+      iframe {
+        flex: 1;
+        border: 0;
+        width: 100%;
+      }
+      @media (max-width: 800px) {
+        main {
+          grid-template-columns: 1fr;
+          height: auto;
+        }
+        iframe {
+          height: 70vh;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>whydidyarender</h1>
+      <p>
+        Same dashboard, same interactions, two separate builds. Left has the
+        React Compiler babel plugin applied, right doesn't. Turn on the
+        render overlay in both and interact with one side, then the other.
+      </p>
+    </header>
+    <main>
+      <div class="pane">
+        <div class="pane-label">Compiled</div>
+        <iframe src="/compiled/" title="React Compiler enabled"></iframe>
+      </div>
+      <div class="pane">
+        <div class="pane-label">Uncompiled</div>
+        <iframe src="/uncompiled/" title="React Compiler disabled"></iframe>
+      </div>
+    </main>
+  </body>
+</html>

@@ -1,4 +1,4 @@
-import { memo, useEffect, useMemo, useState } from "react";
+import { Profiler, memo, useEffect, useMemo, useState } from "react";
 import {
   DEPARTMENT_OPTIONS,
   STATUS_OPTIONS,
@@ -7,6 +7,7 @@ import {
   type Row,
   type Status,
 } from "../data/mockData";
+import { useRenderTracking } from "../hooks/useRenderTracking";
 
 const ALL_DEPARTMENTS = "all" as const;
 const ALL_STATUSES = "all" as const;
@@ -24,6 +25,8 @@ const STATUS_STYLES: Record<Status, string> = {
 };
 
 export default function Dashboard() {
+  const { ref: rootRef, onRender: rootOnRender, id: rootId } = useRenderTracking<HTMLDivElement>("Dashboard");
+
   const rows = useMemo(() => generateMockRows(60), []);
 
   const [search, setSearch] = useState("");
@@ -68,32 +71,34 @@ export default function Dashboard() {
   const totalRevenue = filteredRows.reduce((sum, row) => sum + row.revenue, 0);
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6 p-6">
-      <header className="space-y-1">
-        <h1 className="text-2xl font-semibold text-neutral-100">whydidyarender</h1>
-        <p className="text-sm text-neutral-400">
-          A dashboard engineered to re-render more than it should. Tick: {tick}s
-        </p>
-      </header>
+    <Profiler id={rootId} onRender={rootOnRender}>
+      <div ref={rootRef} className="mx-auto max-w-5xl space-y-6 p-6">
+        <header className="space-y-1">
+          <h1 className="text-2xl font-semibold text-neutral-100">whydidyarender</h1>
+          <p className="text-sm text-neutral-400">
+            A dashboard engineered to re-render more than it should. Tick: {tick}s
+          </p>
+        </header>
 
-      <Toolbar
-        search={search}
-        onSearchChange={setSearch}
-        department={department}
-        onDepartmentChange={setDepartment}
-        status={status}
-        onStatusChange={setStatus}
-      />
+        <Toolbar
+          search={search}
+          onSearchChange={setSearch}
+          department={department}
+          onDepartmentChange={setDepartment}
+          status={status}
+          onStatusChange={setStatus}
+        />
 
-      <StatsBar
-        totalRows={rows.length}
-        visibleRows={filteredRows.length}
-        selectedRows={selectedIds.size}
-        totalRevenue={totalRevenue}
-      />
+        <StatsBar
+          totalRows={rows.length}
+          visibleRows={filteredRows.length}
+          selectedRows={selectedIds.size}
+          totalRevenue={totalRevenue}
+        />
 
-      <Table rows={filteredRows} selectedIds={selectedIds} onToggleSelect={handleToggleSelect} />
-    </div>
+        <Table rows={filteredRows} selectedIds={selectedIds} onToggleSelect={handleToggleSelect} />
+      </div>
+    </Profiler>
   );
 }
 
@@ -114,39 +119,43 @@ function Toolbar({
   status,
   onStatusChange,
 }: ToolbarProps) {
+  const { ref, onRender, id } = useRenderTracking<HTMLDivElement>("Toolbar");
+
   return (
-    <div className="flex flex-wrap gap-3 rounded-lg border border-neutral-800 bg-neutral-900/50 p-4">
-      <input
-        value={search}
-        onChange={(e) => onSearchChange(e.target.value)}
-        placeholder="Search by name…"
-        className="flex-1 min-w-[180px] rounded-md border border-neutral-700 bg-neutral-950 px-3 py-1.5 text-sm text-neutral-100 placeholder:text-neutral-500 focus:border-neutral-500 focus:outline-none"
-      />
-      <select
-        value={department}
-        onChange={(e) => onDepartmentChange(e.target.value as Department | typeof ALL_DEPARTMENTS)}
-        className="rounded-md border border-neutral-700 bg-neutral-950 px-3 py-1.5 text-sm text-neutral-100 focus:border-neutral-500 focus:outline-none"
-      >
-        <option value={ALL_DEPARTMENTS}>All departments</option>
-        {DEPARTMENT_OPTIONS.map((dept) => (
-          <option key={dept} value={dept}>
-            {dept}
-          </option>
-        ))}
-      </select>
-      <select
-        value={status}
-        onChange={(e) => onStatusChange(e.target.value as Status | typeof ALL_STATUSES)}
-        className="rounded-md border border-neutral-700 bg-neutral-950 px-3 py-1.5 text-sm text-neutral-100 focus:border-neutral-500 focus:outline-none"
-      >
-        <option value={ALL_STATUSES}>All statuses</option>
-        {STATUS_OPTIONS.map((s) => (
-          <option key={s} value={s}>
-            {s}
-          </option>
-        ))}
-      </select>
-    </div>
+    <Profiler id={id} onRender={onRender}>
+      <div ref={ref} className="flex flex-wrap gap-3 rounded-lg border border-neutral-800 bg-neutral-900/50 p-4">
+        <input
+          value={search}
+          onChange={(e) => onSearchChange(e.target.value)}
+          placeholder="Search by name…"
+          className="flex-1 min-w-[180px] rounded-md border border-neutral-700 bg-neutral-950 px-3 py-1.5 text-sm text-neutral-100 placeholder:text-neutral-500 focus:border-neutral-500 focus:outline-none"
+        />
+        <select
+          value={department}
+          onChange={(e) => onDepartmentChange(e.target.value as Department | typeof ALL_DEPARTMENTS)}
+          className="rounded-md border border-neutral-700 bg-neutral-950 px-3 py-1.5 text-sm text-neutral-100 focus:border-neutral-500 focus:outline-none"
+        >
+          <option value={ALL_DEPARTMENTS}>All departments</option>
+          {DEPARTMENT_OPTIONS.map((dept) => (
+            <option key={dept} value={dept}>
+              {dept}
+            </option>
+          ))}
+        </select>
+        <select
+          value={status}
+          onChange={(e) => onStatusChange(e.target.value as Status | typeof ALL_STATUSES)}
+          className="rounded-md border border-neutral-700 bg-neutral-950 px-3 py-1.5 text-sm text-neutral-100 focus:border-neutral-500 focus:outline-none"
+        >
+          <option value={ALL_STATUSES}>All statuses</option>
+          {STATUS_OPTIONS.map((s) => (
+            <option key={s} value={s}>
+              {s}
+            </option>
+          ))}
+        </select>
+      </div>
+    </Profiler>
   );
 }
 
@@ -158,22 +167,30 @@ interface StatsBarProps {
 }
 
 function StatsBar({ totalRows, visibleRows, selectedRows, totalRevenue }: StatsBarProps) {
+  const { ref, onRender, id } = useRenderTracking<HTMLDivElement>("StatsBar");
+
   return (
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-      <StatCard label="Total rows" value={totalRows.toString()} />
-      <StatCard label="Visible" value={visibleRows.toString()} />
-      <StatCard label="Selected" value={selectedRows.toString()} />
-      <StatCard label="Revenue (visible)" value={currencyFormatter.format(totalRevenue)} />
-    </div>
+    <Profiler id={id} onRender={onRender}>
+      <div ref={ref} className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <StatCard label="Total rows" value={totalRows.toString()} />
+        <StatCard label="Visible" value={visibleRows.toString()} />
+        <StatCard label="Selected" value={selectedRows.toString()} />
+        <StatCard label="Revenue (visible)" value={currencyFormatter.format(totalRevenue)} />
+      </div>
+    </Profiler>
   );
 }
 
 function StatCard({ label, value }: { label: string; value: string }) {
+  const { ref, onRender, id } = useRenderTracking<HTMLDivElement>(`StatCard:${label}`);
+
   return (
-    <div className="rounded-lg border border-neutral-800 bg-neutral-900/50 p-4">
-      <p className="text-xs uppercase tracking-wide text-neutral-500">{label}</p>
-      <p className="mt-1 text-lg font-semibold text-neutral-100">{value}</p>
-    </div>
+    <Profiler id={id} onRender={onRender}>
+      <div ref={ref} className="rounded-lg border border-neutral-800 bg-neutral-900/50 p-4">
+        <p className="text-xs uppercase tracking-wide text-neutral-500">{label}</p>
+        <p className="mt-1 text-lg font-semibold text-neutral-100">{value}</p>
+      </div>
+    </Profiler>
   );
 }
 
@@ -184,27 +201,31 @@ interface TableProps {
 }
 
 function Table({ rows, selectedIds, onToggleSelect }: TableProps) {
+  const { ref, onRender, id } = useRenderTracking<HTMLDivElement>("Table");
+
   return (
-    <div className="overflow-hidden rounded-lg border border-neutral-800">
-      <div className="grid grid-cols-[auto_1.5fr_1fr_1fr_1fr_1fr] gap-2 bg-neutral-900 px-4 py-2 text-xs font-medium uppercase tracking-wide text-neutral-500">
-        <span />
-        <span>Name</span>
-        <span>Department</span>
-        <span>Status</span>
-        <span>Revenue</span>
-        <span>Last active</span>
+    <Profiler id={id} onRender={onRender}>
+      <div ref={ref} className="overflow-hidden rounded-lg border border-neutral-800">
+        <div className="grid grid-cols-[auto_1.5fr_1fr_1fr_1fr_1fr] gap-2 bg-neutral-900 px-4 py-2 text-xs font-medium uppercase tracking-wide text-neutral-500">
+          <span />
+          <span>Name</span>
+          <span>Department</span>
+          <span>Status</span>
+          <span>Revenue</span>
+          <span>Last active</span>
+        </div>
+        <div className="divide-y divide-neutral-800">
+          {rows.map((row) => (
+            <TableRow
+              key={row.id}
+              row={row}
+              isSelected={selectedIds.has(row.id)}
+              onToggleSelect={onToggleSelect}
+            />
+          ))}
+        </div>
       </div>
-      <div className="divide-y divide-neutral-800">
-        {rows.map((row) => (
-          <TableRow
-            key={row.id}
-            row={row}
-            isSelected={selectedIds.has(row.id)}
-            onToggleSelect={onToggleSelect}
-          />
-        ))}
-      </div>
-    </div>
+    </Profiler>
   );
 }
 
@@ -220,25 +241,32 @@ interface TableRowProps {
 // stable across parent renders; today they don't, so this memo is a
 // no-op in practice.
 const TableRow = memo(function TableRow({ row, isSelected, onToggleSelect }: TableRowProps) {
+  const { ref, onRender, id } = useRenderTracking<HTMLDivElement>(`TableRow:${row.id}`);
+
   return (
-    <div className="grid grid-cols-[auto_1.5fr_1fr_1fr_1fr_1fr] items-center gap-2 px-4 py-2 text-sm text-neutral-200">
-      <input
-        type="checkbox"
-        checked={isSelected}
-        onChange={() => onToggleSelect(row.id)}
-        className="h-4 w-4 rounded border-neutral-600 bg-neutral-950"
-      />
-      <span className="font-medium text-neutral-100">{row.name}</span>
-      <span className="text-neutral-400">{row.department}</span>
-      <span>
-        <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_STYLES[row.status]}`}>
-          {row.status}
+    <Profiler id={id} onRender={onRender}>
+      <div
+        ref={ref}
+        className="grid grid-cols-[auto_1.5fr_1fr_1fr_1fr_1fr] items-center gap-2 px-4 py-2 text-sm text-neutral-200"
+      >
+        <input
+          type="checkbox"
+          checked={isSelected}
+          onChange={() => onToggleSelect(row.id)}
+          className="h-4 w-4 rounded border-neutral-600 bg-neutral-950"
+        />
+        <span className="font-medium text-neutral-100">{row.name}</span>
+        <span className="text-neutral-400">{row.department}</span>
+        <span>
+          <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_STYLES[row.status]}`}>
+            {row.status}
+          </span>
         </span>
-      </span>
-      <span className="tabular-nums text-neutral-400">{currencyFormatter.format(row.revenue)}</span>
-      <span className="text-neutral-500">
-        {row.lastActiveDaysAgo === 0 ? "today" : `${row.lastActiveDaysAgo}d ago`}
-      </span>
-    </div>
+        <span className="tabular-nums text-neutral-400">{currencyFormatter.format(row.revenue)}</span>
+        <span className="text-neutral-500">
+          {row.lastActiveDaysAgo === 0 ? "today" : `${row.lastActiveDaysAgo}d ago`}
+        </span>
+      </div>
+    </Profiler>
   );
 });

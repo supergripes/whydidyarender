@@ -5,7 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:uncompiled": "WHYDIDYARENDER_COMPILER=off vite",
     "build": "tsc -b && vite build",
+    "build:compiled": "tsc -b && vite build --outDir dist/compiled --base /compiled/",
+    "build:uncompiled": "tsc -b && WHYDIDYARENDER_COMPILER=off vite build --outDir dist/uncompiled --base /uncompiled/",
+    "build:compare": "node scripts/build-compare.mjs",
     "preview": "vite preview"
   },
   "dependencies": {

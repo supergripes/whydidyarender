@@ -21,3 +21,22 @@ free.
 npm install
 npm run dev
 ```
+
+## React Compiler comparison
+
+React Compiler is a build-time transform, so it can't be flipped on and
+off while the app is running. Instead, there are two separate builds:
+
+```bash
+npm run build:compare
+npm run preview
+```
+
+This builds the dashboard twice, once with the compiler applied and once
+without, and serves both side by side (each in its own iframe) via
+`compare.html`. Turn on the render overlay in both panes and interact
+with one side, then the other, to see the difference.
+
+For local iteration, `npm run dev:uncompiled` runs the dev server with
+the compiler turned off (`npm run dev` has it on, same as `npm run
+build`).
