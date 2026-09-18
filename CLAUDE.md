@@ -56,6 +56,17 @@ of just doing it.
   `npm run build:compare`. React Compiler is a build-time transform, so
   there's no live runtime toggle; this is the two-separate-builds
   fallback instead.
+- Tests live next to what they cover (`*.test.ts(x)`), run via Vitest
+  (config lives in `vite.config.ts`'s `test` field, not a separate file).
+  `RenderCounter.test.tsx` and `RenderOverlay.test.tsx` both
+  `vi.mock("../hooks/useRenderTracking")` to replace
+  `subscribeToRenderEvents` with a controllable fake bus, so render-event
+  timing is asserted deterministically instead of depending on real
+  Profiler/DOM timing. `useRenderTracking.test.tsx` and
+  `Dashboard.test.tsx` exercise the real thing. Deliberately no test
+  asserts on render *counts* through the UI with vs. without the
+  compiler; `compare.html` covers that, and turning it into an assertion
+  would just make the suite fragile.
 
 ## Conventions
 
@@ -65,8 +76,8 @@ of just doing it.
   period, comma, or colon instead.
 - No new dependencies beyond what's already installed
   (`react`/`react-dom`, `vite`, `@vitejs/plugin-react`, `tailwindcss`,
-  `@tailwindcss/vite`, `babel-plugin-react-compiler`, `typescript`)
-  without asking first.
+  `@tailwindcss/vite`, `babel-plugin-react-compiler`, `typescript`,
+  `vitest`, `@testing-library/*`, `jsdom`) without asking first.
 - TypeScript is pinned to the 5.9.x line rather than the newer 7.x native
   compiler, and `@vitejs/plugin-react` to 5.x rather than 6.x. The 6.x
   line dropped the classic `babel: { plugins }` option that
@@ -91,4 +102,6 @@ npm run dev:uncompiled   # compiler off, for local comparison
 npm run build             # single production build (compiler on)
 npm run build:compare     # builds both variants + compare.html into dist/
 npm run preview           # serves dist/
+npm run test              # run the test suite once
+npm run test:watch        # watch mode
 ```

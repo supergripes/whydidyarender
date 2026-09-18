@@ -13,6 +13,7 @@ free.
 - Vite + React 19 + TypeScript
 - React Compiler (`babel-plugin-react-compiler`)
 - Tailwind CSS v4
+- Vitest + React Testing Library
 - No backend: all data is mock, generated client-side
 
 ## Getting started
@@ -21,6 +22,22 @@ free.
 npm install
 npm run dev
 ```
+
+## Testing
+
+```bash
+npm run test        # run once
+npm run test:watch  # watch mode
+```
+
+Covers the deterministic mock data generator, the Profiler-based render
+tracking bus (mount vs. update events, per-instance ids, unsubscribe),
+the 10-second rolling render counter and the flash overlay's lifecycle
+(both driven off a mocked event bus so timing is fully controlled), and
+the dashboard's own filtering/selection behavior. Deliberately does not
+try to assert on render *counts* through the actual UI (with vs. without
+the compiler): that's exactly what `compare.html` is for, and it would
+make the tests fragile without adding real confidence.
 
 ## React Compiler comparison
 
