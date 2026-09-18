@@ -57,3 +57,7 @@ with one side, then the other, to see the difference.
 For local iteration, `npm run dev:uncompiled` runs the dev server with
 the compiler turned off (`npm run dev` has it on, same as `npm run
 build`).
+
+## License
+
+MIT
