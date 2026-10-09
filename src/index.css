@@ -2,7 +2,7 @@
 
 @keyframes render-flash {
   from {
-    opacity: 1;
+    opacity: 0.8;
   }
   to {
     opacity: 0;
@@ -10,5 +10,50 @@
 }
 
 .render-flash {
-  animation: render-flash 500ms ease-out forwards;
+  animation: render-flash 400ms ease-out forwards;
+}
+
+/* Badges (counts) carry the message; the flash is only a hint. With
+   reduced motion requested, drop the flash entirely and keep the badges. */
+@media (prefers-reduced-motion: reduce) {
+  .render-flash {
+    display: none;
+  }
+}
+
+.render-badge {
+  display: inline-block;
+  min-width: 2.25rem;
+  padding: 0 0.375rem;
+  border-radius: 9999px;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.125rem;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+}
+
+.render-badge[data-heat="0"] {
+  background: rgb(115 115 115 / 0.15);
+  color: rgb(163 163 163);
+}
+
+.render-badge[data-heat="1"] {
+  background: rgb(234 179 8 / 0.2);
+  color: rgb(250 204 21);
+}
+
+.render-badge[data-heat="2"] {
+  background: rgb(249 115 22 / 0.25);
+  color: rgb(251 146 60);
+}
+
+.render-badge[data-heat="3"] {
+  background: rgb(239 68 68 / 0.3);
+  color: rgb(248 113 113);
+}
+
+[data-overlay="off"] .render-badge {
+  display: none;
 }
