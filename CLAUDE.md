@@ -110,10 +110,17 @@ of just doing it.
 ## Git workflow
 
 - `main` is ruleset-protected on GitHub: PR required (0 approvals, since
-  this is a solo project), linear history, no direct pushes, no
-  force-pushes, no deletions.
+  this is a solo project), no direct pushes, no force-pushes, no
+  deletions. Linear history is deliberately **not** required.
 - `develop` is the working branch: no PR required, force-push allowed
   (for `amend`/`rebase`), just protected from accidental deletion.
+- Merge `develop` into `main` with **"Create a merge commit"**, not
+  squash or rebase. Squash and rebase recreate the commits on `main` with
+  new hashes, so the long-lived `develop` ends up diverged from `main`
+  (same content, different history) and has to be reset or rebased onto
+  it before the next PR. A merge commit keeps `develop` an ancestor of
+  `main`, so nothing needs reconciling. The trade-off: `main` gets
+  "Merge pull request #N" commits instead of Conventional Commits titles.
 
 ## Build & test
 
