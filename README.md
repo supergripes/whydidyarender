@@ -58,6 +58,14 @@ For local iteration, `npm run dev:uncompiled` runs the dev server with
 the compiler turned off (`npm run dev` has it on, same as `npm run
 build`).
 
+## Deployment
+
+Pushes to `main` run the tests, build the comparison page with
+`npm run build:compare`, and publish `dist/` to GitHub Pages via
+[.github/workflows/deploy.yml](.github/workflows/deploy.yml). Both
+builds use relative asset paths, so the site works from the
+`/whydidyarender/` subpath GitHub Pages serves it under.
+
 ## License
 
 MIT

@@ -55,7 +55,14 @@ of just doing it.
   two-iframe comparison page (`/compiled/` vs `/uncompiled/`), built by
   `npm run build:compare`. React Compiler is a build-time transform, so
   there's no live runtime toggle; this is the two-separate-builds
-  fallback instead.
+  fallback instead. Both variants are built with `--base ./` and the
+  iframes use relative `src`s (`compiled/`, `uncompiled/`), never
+  absolute `/compiled/`: GitHub Pages serves the site from the
+  `/whydidyarender/` subpath, so absolute paths would 404 there.
+- [.github/workflows/deploy.yml](.github/workflows/deploy.yml): on push
+  to `main`, runs the tests, then `build:compare`, then publishes `dist/`
+  to GitHub Pages. Pages' `github-pages` environment only accepts deploys
+  from the default branch (`main`), so `develop` never deploys.
 - Tests live next to what they cover (`*.test.ts(x)`), run via Vitest
   (config lives in `vite.config.ts`'s `test` field, not a separate file).
   `RenderCounter.test.tsx` and `RenderOverlay.test.tsx` both
