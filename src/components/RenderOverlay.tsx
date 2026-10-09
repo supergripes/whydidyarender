@@ -5,7 +5,7 @@ interface Flash extends RenderFlashEvent {
   key: number;
 }
 
-const FLASH_DURATION_MS = 500;
+const FLASH_DURATION_MS = 400;
 
 const PHASE_COLOR: Record<RenderFlashEvent["phase"], string> = {
   mount: "34, 197, 94", // green: first render
@@ -28,6 +28,7 @@ export default function RenderOverlay({ enabled }: RenderOverlayProps) {
     }
 
     return subscribeToRenderEvents((event) => {
+      if (event.container) return;
       const key = nextKey.current++;
       setFlashes((prev) => [...prev, { ...event, key }]);
       setTimeout(() => {
@@ -52,7 +53,6 @@ export default function RenderOverlay({ enabled }: RenderOverlayProps) {
               width: flash.rect.width,
               height: flash.rect.height,
               border: `2px solid rgb(${color})`,
-              backgroundColor: `rgba(${color}, 0.18)`,
             }}
           />
         );

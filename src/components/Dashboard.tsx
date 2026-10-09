@@ -8,6 +8,7 @@ import {
   type Status,
 } from "../data/mockData";
 import { useRenderTracking } from "../hooks/useRenderTracking";
+import RenderBadge from "./RenderBadge";
 
 const ALL_DEPARTMENTS = "all" as const;
 const ALL_STATUSES = "all" as const;
@@ -24,8 +25,16 @@ const STATUS_STYLES: Record<Status, string> = {
   archived: "bg-neutral-500/15 text-neutral-400",
 };
 
-export default function Dashboard() {
-  const { ref: rootRef, onRender: rootOnRender, id: rootId } = useRenderTracking<HTMLDivElement>("Dashboard");
+interface DashboardProps {
+  liveClock?: boolean;
+}
+
+export default function Dashboard({ liveClock = false }: DashboardProps) {
+  const {
+    ref: rootRef,
+    onRender: rootOnRender,
+    id: rootId,
+  } = useRenderTracking<HTMLDivElement>("Dashboard", { container: true });
 
   const rows = useMemo(() => generateMockRows(60), []);
 
@@ -37,12 +46,14 @@ export default function Dashboard() {
   // A high-frequency, mostly-irrelevant piece of state living at the top
   // of the tree: the classic setup for a re-render cascade. Everything
   // downstream re-renders once a second whether it cares about the tick
-  // or not, unless it's actually memoized against stable props.
+  // or not, unless it's actually memoized against stable props. Opt-in,
+  // so the page stays still until you interact with it.
   const [tick, setTick] = useState(0);
   useEffect(() => {
+    if (!liveClock) return;
     const id = setInterval(() => setTick((t) => t + 1), 1000);
     return () => clearInterval(id);
-  }, []);
+  }, [liveClock]);
 
   const filteredRows = rows.filter((row) => {
     const matchesSearch = row.name.toLowerCase().includes(search.toLowerCase());
@@ -72,11 +83,13 @@ export default function Dashboard() {
 
   return (
     <Profiler id={rootId} onRender={rootOnRender}>
-      <div ref={rootRef} className="mx-auto max-w-5xl space-y-6 p-6">
+      <div ref={rootRef} className="relative mx-auto max-w-5xl space-y-6 p-6">
+        <RenderBadge id={rootId} className="absolute right-6 top-2 z-10" />
         <header className="space-y-1">
           <h1 className="text-2xl font-semibold text-neutral-100">whydidyarender</h1>
           <p className="text-sm text-neutral-400">
-            A dashboard engineered to re-render more than it should. Tick: {tick}s
+            A dashboard engineered to re-render more than it should.{" "}
+            {liveClock ? `Tick: ${tick}s` : "Live clock: off"}
           </p>
         </header>
 
@@ -123,7 +136,11 @@ function Toolbar({
 
   return (
     <Profiler id={id} onRender={onRender}>
-      <div ref={ref} className="flex flex-wrap gap-3 rounded-lg border border-neutral-800 bg-neutral-900/50 p-4">
+      <div
+        ref={ref}
+        className="relative flex flex-wrap gap-3 rounded-lg border border-neutral-800 bg-neutral-900/50 p-4"
+      >
+        <RenderBadge id={id} className="absolute -top-2.5 right-3 z-10" />
         <input
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
@@ -167,11 +184,12 @@ interface StatsBarProps {
 }
 
 function StatsBar({ totalRows, visibleRows, selectedRows, totalRevenue }: StatsBarProps) {
-  const { ref, onRender, id } = useRenderTracking<HTMLDivElement>("StatsBar");
+  const { ref, onRender, id } = useRenderTracking<HTMLDivElement>("StatsBar", { container: true });
 
   return (
     <Profiler id={id} onRender={onRender}>
-      <div ref={ref} className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <div ref={ref} className="relative grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <RenderBadge id={id} className="absolute -top-2.5 right-3 z-10" />
         <StatCard label="Total rows" value={totalRows.toString()} />
         <StatCard label="Visible" value={visibleRows.toString()} />
         <StatCard label="Selected" value={selectedRows.toString()} />
@@ -186,7 +204,8 @@ function StatCard({ label, value }: { label: string; value: string }) {
 
   return (
     <Profiler id={id} onRender={onRender}>
-      <div ref={ref} className="rounded-lg border border-neutral-800 bg-neutral-900/50 p-4">
+      <div ref={ref} className="relative rounded-lg border border-neutral-800 bg-neutral-900/50 p-4">
+        <RenderBadge id={id} className="absolute bottom-2 right-2 z-10" />
         <p className="text-xs uppercase tracking-wide text-neutral-500">{label}</p>
         <p className="mt-1 text-lg font-semibold text-neutral-100">{value}</p>
       </div>
@@ -201,18 +220,19 @@ interface TableProps {
 }
 
 function Table({ rows, selectedIds, onToggleSelect }: TableProps) {
-  const { ref, onRender, id } = useRenderTracking<HTMLDivElement>("Table");
+  const { ref, onRender, id } = useRenderTracking<HTMLDivElement>("Table", { container: true });
 
   return (
     <Profiler id={id} onRender={onRender}>
       <div ref={ref} className="overflow-hidden rounded-lg border border-neutral-800">
-        <div className="grid grid-cols-[auto_1.5fr_1fr_1fr_1fr_1fr] gap-2 bg-neutral-900 px-4 py-2 text-xs font-medium uppercase tracking-wide text-neutral-500">
+        <div className="grid grid-cols-[auto_1.5fr_1fr_1fr_1fr_1fr_auto] items-center gap-2 bg-neutral-900 px-4 py-2 text-xs font-medium uppercase tracking-wide text-neutral-500">
           <span />
           <span>Name</span>
           <span>Department</span>
           <span>Status</span>
           <span>Revenue</span>
           <span>Last active</span>
+          <RenderBadge id={id} />
         </div>
         <div className="divide-y divide-neutral-800">
           {rows.map((row) => (
@@ -247,7 +267,7 @@ const TableRow = memo(function TableRow({ row, isSelected, onToggleSelect }: Tab
     <Profiler id={id} onRender={onRender}>
       <div
         ref={ref}
-        className="grid grid-cols-[auto_1.5fr_1fr_1fr_1fr_1fr] items-center gap-2 px-4 py-2 text-sm text-neutral-200"
+        className="grid grid-cols-[auto_1.5fr_1fr_1fr_1fr_1fr_auto] items-center gap-2 px-4 py-2 text-sm text-neutral-200"
       >
         <input
           type="checkbox"
@@ -266,6 +286,7 @@ const TableRow = memo(function TableRow({ row, isSelected, onToggleSelect }: Tab
         <span className="text-neutral-500">
           {row.lastActiveDaysAgo === 0 ? "today" : `${row.lastActiveDaysAgo}d ago`}
         </span>
+        <RenderBadge id={id} />
       </div>
     </Profiler>
   );

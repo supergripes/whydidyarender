@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import Dashboard from "./Dashboard";
 
@@ -50,5 +50,36 @@ describe("Dashboard", () => {
 
     await user.click(checkboxes[0]);
     expect(statValue("Selected")).toBe("1");
+  });
+
+  describe("live clock", () => {
+    beforeEach(() => vi.useFakeTimers());
+    afterEach(() => vi.useRealTimers());
+
+    it("stays still by default", () => {
+      render(<Dashboard />);
+
+      act(() => {
+        vi.advanceTimersByTime(3000);
+      });
+
+      expect(screen.getByText(/Live clock: off/)).toBeInTheDocument();
+      expect(screen.queryByText(/Tick:/)).not.toBeInTheDocument();
+    });
+
+    it("ticks once a second when enabled, and stops when disabled again", () => {
+      const { rerender } = render(<Dashboard liveClock />);
+
+      act(() => {
+        vi.advanceTimersByTime(3000);
+      });
+      expect(screen.getByText(/Tick: 3s/)).toBeInTheDocument();
+
+      rerender(<Dashboard liveClock={false} />);
+      act(() => {
+        vi.advanceTimersByTime(3000);
+      });
+      expect(screen.getByText(/Live clock: off/)).toBeInTheDocument();
+    });
   });
 });

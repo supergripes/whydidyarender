@@ -1,8 +1,15 @@
 # whydidyarender
 
 A small dashboard purpose-built to re-render more than it should, plus a
-real-time overlay (via React's Profiler API) that flashes every component
-as it re-renders, so you can *see* the cascade instead of guessing at it.
+real-time overlay (via React's Profiler API) that puts a badge on every
+component counting how many times it has re-rendered, so you can *see*
+the cascade instead of guessing at it. Badges run from gray (0) through
+yellow (1-2) and orange (3-9) to red (10+), and leaf components also get
+a brief outline when they re-render (skipped with `prefers-reduced-motion`).
+
+The page starts still. Type in the search box or tick a few rows, or
+switch on "Live clock" to add a state change every second, then hit
+"Reset counts" to start a fresh measurement.
 
 Also compares the same UI with and without React Compiler enabled, side
 by side, so you can see how many of those re-renders it eliminates for

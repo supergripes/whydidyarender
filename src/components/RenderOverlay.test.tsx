@@ -19,6 +19,7 @@ function emit(overrides: Partial<RenderFlashEvent> = {}) {
     phase: "update",
     rect: { left: 0, top: 0, width: 10, height: 10 } as DOMRect,
     timestamp: 0,
+    container: false,
     ...overrides,
   };
   for (const listener of listeners) listener(event);
@@ -49,8 +50,16 @@ describe("RenderOverlay", () => {
     expect(container.querySelectorAll(".render-flash")).toHaveLength(1);
 
     act(() => {
-      vi.advanceTimersByTime(500);
+      vi.advanceTimersByTime(400);
     });
+    expect(container.querySelectorAll(".render-flash")).toHaveLength(0);
+  });
+
+  it("does not flash container components, since they re-render whenever anything inside does", () => {
+    const { container } = render(<RenderOverlay enabled />);
+
+    act(() => emit({ id: "Dashboard", container: true }));
+
     expect(container.querySelectorAll(".render-flash")).toHaveLength(0);
   });
 

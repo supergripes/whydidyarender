@@ -30,13 +30,28 @@ of just doing it.
   onRender={onRender}>`. Each instance needs a unique id (e.g.
   `` `TableRow:${row.id}` ``) since React aggregates commits per id, not
   per component instance. This file also owns the module-level pub/sub
-  event bus (`subscribeToRenderEvents`) that both `RenderOverlay` and
-  `RenderCounter` consume. It's always active, independent of whether the
-  overlay is visually toggled on.
+  event bus (`subscribeToRenderEvents`) that `RenderOverlay` and
+  `RenderCounter` consume, plus per-id re-render counts (mounts excluded,
+  `getRenderCount` / `resetRenderCounts`) that `RenderBadge` reads. It's
+  always active, independent of whether the overlay is visually toggled
+  on. `useRenderTracking(id, { container: true })` marks components that
+  re-render whenever anything inside them does (`Dashboard`, `StatsBar`,
+  `Table`): they still count, but they never flash.
 - [src/components/RenderOverlay.tsx](src/components/RenderOverlay.tsx):
-  subscribes to the event bus when `enabled`, flashes a colored box
-  (green for mount, red for update) over the real DOM position of
-  whatever just re-rendered, fading out over 500ms.
+  subscribes to the event bus when `enabled`, flashes an outline-only box
+  (green for mount, red for update, no fill) over the real DOM position
+  of whatever just re-rendered, fading out over 400ms. Skips containers.
+  The flash is hidden by CSS under `prefers-reduced-motion`.
+- [src/components/RenderBadge.tsx](src/components/RenderBadge.tsx): the
+  re-render count pill placed inside every tracked component. It updates
+  the DOM imperatively on purpose: it sits inside the component's
+  `Profiler` boundary, so a React state update from the badge would count
+  as a render of that component and loop forever. Keep it stateless. Heat
+  colors live in `index.css` (`data-heat` 0-3), and `App` hides every
+  badge via `[data-overlay="off"]` when the overlay toggle is off.
+- The live clock in `Dashboard` (the 1 Hz state change that drives the
+  cascade) is opt-in via the `liveClock` prop and off by default, so an
+  idle page is calm and renders only appear in response to interaction.
 - [src/components/RenderCounter.tsx](src/components/RenderCounter.tsx):
   rolling 10-second count of render events. Always subscribed, regardless
   of the overlay toggle.
