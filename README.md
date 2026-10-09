@@ -8,6 +8,8 @@ Also compares the same UI with and without React Compiler enabled, side
 by side, so you can see how many of those re-renders it eliminates for
 free.
 
+**Live demo: https://supergripes.github.io/whydidyarender/**
+
 ## Stack
 
 - Vite + React 19 + TypeScript
